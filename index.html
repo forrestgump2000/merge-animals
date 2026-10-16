@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Merge Animals</title>
+    <meta name="description" content="Catch fish, merge them into wild new creatures, and battle for coins!" />
+    <meta name="theme-color" content="#1f6fa8" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Merge Animals" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <div id="labels"></div>
+
+    <div id="hud">
+      <div class="logo">MERGE<br />ANIMALS</div>
+      <div class="hud-right">
+        <div class="pill"><img class="ico" id="coinIco" alt="" /><span id="coins">0</span></div>
+        <button class="mc-btn small" id="baitBtn"><img class="ico" id="baitIco" alt="" /><span id="baitName"></span></button>
+        <button class="mc-btn small" id="shopBtn">Shop</button>
+        <button class="mc-btn small" id="dexBtn">Fishdex</button>
+        <button class="mc-btn small" id="muteBtn" aria-label="Toggle sound">♪</button>
+      </div>
+    </div>
+
+    <div id="hpbars" hidden>
+      <div class="hp" id="hp0"><div class="hpname"></div><div class="bar"><div class="fill"></div></div><div class="hpnum"></div></div>
+      <div class="vs">VS</div>
+      <div class="hp" id="hp1"><div class="hpname"></div><div class="bar"><div class="fill"></div></div><div class="hpnum"></div></div>
+    </div>
+
+    <div id="bottom">
+      <div id="msg"></div>
+      <div id="actions"></div>
+    </div>
+
+    <div id="title">
+      <div class="title-logo">MERGE<br />ANIMALS</div>
+      <div class="title-sub">Catch • Merge • Battle</div>
+      <div class="title-demo" id="demoName"></div>
+      <button class="mc-btn big gold" id="playBtn">▶ Play</button>
+      <div class="how">
+        Cast your line to catch 2 fish → merge them into a new creature.<br />
+        Make a second creature, pick who you think wins, and earn coins!<br />
+        Spend coins on better bait for rarer fish.
+      </div>
+    </div>
+
+    <div id="flash"></div>
+    <div id="modal" hidden><div class="panel" id="panel"></div></div>
+    <div id="toast"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
