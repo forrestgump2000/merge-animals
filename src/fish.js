@@ -17,7 +17,7 @@ const mod = (a, n) => ((a % n) + n) % n;
 export const FISH = [
   // ---------------- COMMON ----------------
   {
-    id: 'bluegill', name: 'Bluegill', rarity: 0, hp: 24, atk: 5, spd: 6, pre: 'Blue', suf: 'gill',
+    id: 'bluegill', name: 'Bluegill', rarity: 0, hp: 24, atk: 5, spd: 6,
     eye: { x: 8, y: 2, size: 2 },
     build(v) {
       const top = 0x3f6b5a, mid = 0x6b8f5e, bot = 0xf0a838;
@@ -32,7 +32,7 @@ export const FISH = [
     },
   },
   {
-    id: 'goldfish', name: 'Goldfish', rarity: 0, hp: 22, atk: 4, spd: 5, pre: 'Gold', suf: 'goldie',
+    id: 'goldfish', name: 'Goldfish', rarity: 0, hp: 22, atk: 4, spd: 5,
     eye: { x: 6, y: 1, size: 2 },
     build(v) {
       const O = 0xf28c28, O2 = 0xffb347, L = 0xfff1d6;
@@ -44,7 +44,7 @@ export const FISH = [
     },
   },
   {
-    id: 'tuna', name: 'Tuna', rarity: 0, hp: 26, atk: 6, spd: 9, pre: 'Tuna', suf: 'tuna',
+    id: 'tuna', name: 'Tuna', rarity: 0, hp: 26, atk: 6, spd: 9,
     eye: { x: 11, y: 1, size: 2 },
     build(v) {
       const top = 0x1f3b73, side = 0x8fa3b8, bot = 0xdfe6ec, Y = 0xf2c80f;
@@ -64,7 +64,7 @@ export const FISH = [
     },
   },
   {
-    id: 'halibut', name: 'Halibut', rarity: 0, hp: 28, atk: 4, spd: 4, pre: 'Hali', suf: 'ibut', tilt: 0.7,
+    id: 'halibut', name: 'Halibut', rarity: 0, hp: 28, atk: 4, spd: 4, tilt: 0.7,
     eye: { mode: 'top', x: 7, z: 2, size: 2 },
     build(v) {
       const col = (x, y, z) => (y < 0 ? 0xf2efe8 : hash3(x, y, z) < 0.25 ? 0x8a7558 : 0x6b5b45);
@@ -75,7 +75,7 @@ export const FISH = [
     },
   },
   {
-    id: 'needlefish', name: 'Needlefish', rarity: 0, hp: 18, atk: 7, spd: 10, pre: 'Needle', suf: 'needle',
+    id: 'needlefish', name: 'Needlefish', rarity: 0, hp: 18, atk: 7, spd: 10,
     eye: { x: 8, y: 0, size: 2 },
     build(v) {
       const T = 0x2b8a8f;
@@ -88,9 +88,39 @@ export const FISH = [
       v.paint((p) => p.y === 0 && Math.abs(p.z) >= 1 && p.x < 8 && p.x > -10, 0x5fd3d8);
     },
   },
+  {
+    id: 'catfish', name: 'Catfish', rarity: 0, hp: 27, atk: 5, spd: 4,
+    eye: { x: 10, y: 1, size: 1 },
+    build(v) {
+      const F = 0x5a5244;
+      v.ellipsoid(0, 0, 0, 13, 4.5, 4.5, belly(0x6b6152, 0xd9cfb8, -2));
+      v.ellipsoid(9, -0.5, 0, 5, 3.5, 5, belly(0x6b6152, 0xd9cfb8, -2));
+      v.polyXY([[-12, 0], [-17, 5], [-18, 0], [-17, -5]], 0, 0, F);
+      v.polyXY([[3, 4], [1, 8], [-1, 4]], 0, 0, F);
+      v.polyXY([[-2, -3], [-11, -6], [-12, -3]], 0, 0, F);
+      v.polyXZ([[5, 3], [2, 8], [0, 7], [2, 3]], -2, -2, F, true);
+      for (const s of [1, -1]) {
+        v.capsule(13, 0, 2 * s, 19, -2, 6 * s, 0.6, 0.5, 0x3d362c);
+        v.capsule(13, -2, 1 * s, 16, -6, 2 * s, 0.6, 0.5, 0x3d362c);
+      }
+    },
+  },
+  {
+    id: 'koi', name: 'Koi', rarity: 0, hp: 25, atk: 5, spd: 6,
+    eye: { x: 8, y: 1, size: 2 },
+    build(v) {
+      const col = (x, y, z) => (hash3(Math.floor(x / 4), Math.floor(y / 3), Math.floor(Math.abs(z) / 3)) < 0.45 ? 0xff5a1f
+        : hash3(x, y, Math.abs(z)) < 0.04 ? 0x1a1a1a : 0xfaf6ef);
+      v.ellipsoid(0, 0, 0, 11, 5, 4, col);
+      v.polyXY([[-10, 0], [-17, 6], [-15, 0], [-17, -6]], 0, 0, 0xffe0cc);
+      v.polyXY([[4, 4], [1, 7], [-6, 6], [-7, 4]], 0, 0, 0xfaf6ef);
+      v.polyXZ([[4, 2], [1, 7], [-1, 6], [1, 2]], -2, -2, 0xfaf6ef, true);
+      for (const s of [1, -1]) v.capsule(10, -2, s, 13, -3, 2 * s, 0.5, 0.5, 0xff8a5b);
+    },
+  },
   // ---------------- UNCOMMON ----------------
   {
-    id: 'clownfish', name: 'Clownfish', rarity: 1, hp: 32, atk: 7, spd: 7, pre: 'Clown', suf: 'clown',
+    id: 'clownfish', name: 'Clownfish', rarity: 1, hp: 32, atk: 7, spd: 7,
     eye: { x: 7, y: 1, size: 2 },
     build(v) {
       const O = 0xff7b1c;
@@ -107,7 +137,7 @@ export const FISH = [
     },
   },
   {
-    id: 'angelfish', name: 'Angelfish', rarity: 1, hp: 30, atk: 7, spd: 8, pre: 'Angel', suf: 'angel',
+    id: 'angelfish', name: 'Angelfish', rarity: 1, hp: 30, atk: 7, spd: 8,
     eye: { x: 5, y: 1, size: 2 },
     build(v) {
       const Y = 0xffd23f, B = 0x2b59c3;
@@ -120,7 +150,7 @@ export const FISH = [
     },
   },
   {
-    id: 'parrotfish', name: 'Parrotfish', rarity: 1, hp: 34, atk: 7, spd: 6, pre: 'Parrot', suf: 'parrot',
+    id: 'parrotfish', name: 'Parrotfish', rarity: 1, hp: 34, atk: 7, spd: 6,
     eye: { x: 7, y: 2, size: 2 },
     build(v) {
       const T = 0x2ec4b6, T2 = 0x1a9e92, P = 0xff6fa8;
@@ -136,7 +166,7 @@ export const FISH = [
     },
   },
   {
-    id: 'boxfish', name: 'Boxfish', rarity: 1, hp: 40, atk: 5, spd: 4, pre: 'Box', suf: 'box',
+    id: 'boxfish', name: 'Boxfish', rarity: 1, hp: 40, atk: 5, spd: 4,
     eye: { x: 4, y: 2, size: 2 },
     build(v) {
       const Y = 0xffd60a;
@@ -152,7 +182,7 @@ export const FISH = [
     },
   },
   {
-    id: 'eel', name: 'Eel', rarity: 1, hp: 30, atk: 9, spd: 8, pre: 'Eel', suf: 'eel',
+    id: 'eel', name: 'Eel', rarity: 1, hp: 30, atk: 9, spd: 8,
     eye: { x: 13, y: 0, size: 2, pupil: 0x111111, white: 0xf5e663 },
     build(v) {
       const G = 0x4f7f2a, G2 = 0x2f4f18;
@@ -171,7 +201,7 @@ export const FISH = [
     },
   },
   {
-    id: 'urchin', name: 'Sea Urchin', rarity: 1, hp: 36, atk: 6, spd: 2, pre: 'Urchin', suf: 'urchin',
+    id: 'urchin', name: 'Sea Urchin', rarity: 1, hp: 36, atk: 6, spd: 2,
     eye: { x: 5, y: 1, size: 2 },
     build(v) {
       v.ellipsoid(0, 0, 0, 6, 6, 6, (x, y, z) => (hash3(x, y, z) < 0.2 ? 0x6a2c8a : 0x4b1d5e));
@@ -181,9 +211,53 @@ export const FISH = [
       }
     },
   },
+  {
+    id: 'piranha', name: 'Piranha', rarity: 1, hp: 28, atk: 10, spd: 8,
+    eye: { x: 6, y: 2, size: 2, white: 0xffe08a },
+    build(v) {
+      const col = (x, y, z) => (y < -1 ? 0xd62828 : hash3(x, y, z) < 0.1 ? 0xb8c4cf : 0x7d8a96);
+      v.ellipsoid(0, 0, 0, 9, 6.5, 3.5, col);
+      v.polyXY([[-8, 0], [-13, 5], [-12, 0], [-13, -5]], 0, 0, 0x4a535c);
+      v.polyXY([[1, 6], [-2, 9], [-5, 6]], 0, 0, 0x4a535c);
+      v.polyXY([[-2, -6], [-5, -8], [-7, -5]], 0, 0, 0xd62828);
+      v.box(8, -4, -2, 10, -2, 2, col);
+      for (let z = -2; z <= 2; z++) v.set(10, -1, z, mod(z, 2) === 0 ? W : 0x3a0a0a);
+      v.paint((p) => p.x === 9 && p.y === -1, 0x3a0a0a);
+    },
+  },
+  {
+    id: 'jellyfish', name: 'Jellyfish', rarity: 1, hp: 30, atk: 8, spd: 3,
+    eye: { x: 4, y: 3, size: 2 },
+    build(v) {
+      v.ellipsoid(0, 2, 0, 7, 6, 7, (x, y, z) => (hash3(x, y, z) < 0.15 ? 0xffb3e6 : 0xf78fd0));
+      v.ellipsoid(0, 1, 0, 8, 1, 8, 0xe86bbf);
+      v.removeIf((p) => p.y < 1);
+      v.chain([[0, 1, 0, 1.6], [1, -5, 0, 1.2], [-1, -9, 0, 1]], 0xff7ac8);
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2, bx = Math.cos(a) * 5, bz = Math.sin(a) * 5, w = Math.sin(i * 1.7) * 1.5;
+        v.chain([[bx, 0, bz, 0.6], [bx + w, -5, bz, 0.55], [bx, -10, bz, 0.5], [bx - w, -13, bz, 0.5]], 0xffc2ea);
+        v.set(bx - w, -14, bz, 0xfff0ff, true);
+      }
+    },
+  },
+  {
+    id: 'barracuda', name: 'Barracuda', rarity: 1, hp: 29, atk: 10, spd: 9,
+    eye: { x: 12, y: 1, size: 2 },
+    build(v) {
+      const D = 0x4a5866;
+      const col = (x, y) => (y < -1 ? 0xe8eef2 : mod(x, 4) === 0 && y >= 0 ? D : 0x9aaab8);
+      v.ellipsoid(0, 0, 0, 15, 3.5, 3, col);
+      v.capsule(13, 0, 0, 19, -0.5, 0, 2, 0.8, 0x8a9aa8);
+      v.capsule(13, -1.5, 0, 19.5, -1.5, 0, 1.5, 0.6, 0xd0d8de);
+      v.set(17, -1, 1, W); v.set(17, -1, -1, W); v.set(15, -1, 1, W); v.set(15, -1, -1, W);
+      v.polyXY([[-14, 0], [-19, 6], [-17, 0], [-19, -6]], 0, 0, D);
+      v.polyXY([[3, 3], [0, 7], [-2, 3]], 0, 0, D);
+      v.polyXY([[-7, 3], [-9, 5], [-10, 3]], 0, 0, D);
+    },
+  },
   // ---------------- RARE ----------------
   {
-    id: 'pufferfish', name: 'Pufferfish', rarity: 2, hp: 52, atk: 9, spd: 4, pre: 'Puffer', suf: 'puff',
+    id: 'pufferfish', name: 'Pufferfish', rarity: 2, hp: 52, atk: 9, spd: 4,
     eye: { x: 6, y: 2, size: 2 },
     build(v) {
       const top = 0xd9b45a, bot = 0xf5ecd0;
@@ -197,7 +271,7 @@ export const FISH = [
     },
   },
   {
-    id: 'seahorse', name: 'Seahorse', rarity: 2, hp: 42, atk: 10, spd: 7, pre: 'Sea', suf: 'horse',
+    id: 'seahorse', name: 'Seahorse', rarity: 2, hp: 42, atk: 10, spd: 7,
     eye: { x: 4, y: 11, size: 2 },
     build(v) {
       const O = 0xf4a259, O2 = 0xd9822b;
@@ -212,7 +286,7 @@ export const FISH = [
     },
   },
   {
-    id: 'stingray', name: 'Stingray', rarity: 2, hp: 46, atk: 11, spd: 8, pre: 'Sting', suf: 'ray', tilt: 0.6,
+    id: 'stingray', name: 'Stingray', rarity: 2, hp: 46, atk: 11, spd: 8, tilt: 0.6,
     eye: { mode: 'top', x: 5, z: 2, size: 2 },
     build(v) {
       const col = (x, y, z) => (y < 0 ? 0xefe9e2 : hash3(x, y, z) < 0.12 ? 0x5b4f47 : 0x7d6e63);
@@ -224,7 +298,7 @@ export const FISH = [
     },
   },
   {
-    id: 'stonefish', name: 'Stonefish', rarity: 2, hp: 50, atk: 10, spd: 3, pre: 'Stone', suf: 'stone',
+    id: 'stonefish', name: 'Stonefish', rarity: 2, hp: 50, atk: 10, spd: 3,
     eye: { x: 6, y: 3, size: 2, white: 0xffd27a },
     build(v) {
       const m = mottle([0x6b5a4a, 0x8a7560, 0x4f4338, 0x9c6644, 0x7a6a55]);
@@ -241,7 +315,7 @@ export const FISH = [
     },
   },
   {
-    id: 'sunfish', name: 'Sunfish', rarity: 2, hp: 58, atk: 8, spd: 3, pre: 'Sun', suf: 'sun',
+    id: 'sunfish', name: 'Sunfish', rarity: 2, hp: 58, atk: 8, spd: 3,
     eye: { x: 5, y: 2, size: 2 },
     build(v) {
       const G = 0x9aa5b1, G2 = 0xc4ccd5, G3 = 0x7d8894;
@@ -253,9 +327,38 @@ export const FISH = [
       v.paint((p) => p.x >= 8 && p.y === -1 && Math.abs(p.z) <= 1, 0x4a4f55);
     },
   },
+  {
+    id: 'lionfish', name: 'Lionfish', rarity: 2, hp: 44, atk: 12, spd: 6,
+    eye: { x: 7, y: 2, size: 2, white: 0xffe0a0 },
+    build(v) {
+      const R = 0xc8321e, Wh = 0xfff2e6;
+      v.ellipsoid(0, 0, 0, 9, 5.5, 3.5, (x) => (mod(x, 3) === 0 ? Wh : R));
+      const stripe = (x, y) => (mod(y, 2) === 0 ? Wh : R);
+      for (let i = 0; i < 8; i++) {
+        const x = 5 - i * 1.6;
+        v.capsule(x, 4, 0, x - 2, 13 - i * 0.6, 0, 0.55, 0.5, stripe);
+      }
+      for (let k = 0; k < 6; k++)
+        for (const s of [1, -1]) v.capsule(3, -1, 3 * s, 3 - k * 2, -7 + k * 0.8, 9 * s, 0.55, 0.5, stripe);
+      v.polyXY([[-8, 0], [-13, 4], [-13, -4]], 0, 0, 0xf2c0b0);
+    },
+  },
+  {
+    id: 'swordfish', name: 'Swordfish', rarity: 2, hp: 48, atk: 13, spd: 10,
+    eye: { x: 10, y: 1, size: 2 },
+    build(v) {
+      const D = 0x2a3366, col = belly(0x34407a, 0xcfd6e0, -1);
+      v.ellipsoid(0, 0, 0, 14, 5, 4, col);
+      v.ellipsoid(-12, 0, 0, 3, 1.6, 1.6, col);
+      v.capsule(13, 0.5, 0, 28, 0, 0, 1.4, 0.5, 0x5a5f80);
+      v.polyXY([[6, 4], [4, 12], [1, 11], [-1, 4]], 0, 0, D);
+      v.polyXY([[-14, 0], [-20, 9], [-17, 0], [-20, -9]], 0, 0, D);
+      v.polyXZ([[5, 2], [0, 8], [-1, 7], [2, 2]], -3, -3, D, true);
+    },
+  },
   // ---------------- EPIC ----------------
   {
-    id: 'anglerfish', name: 'Anglerfish', rarity: 3, hp: 64, atk: 14, spd: 5, pre: 'Angler', suf: 'angler',
+    id: 'anglerfish', name: 'Anglerfish', rarity: 3, hp: 64, atk: 14, spd: 5,
     eye: { x: 5, y: 3, size: 2, white: 0xfff8c0 },
     build(v) {
       const m = mottle([0x3a2e2b, 0x3a2e2b, 0x4d3c36]);
@@ -271,7 +374,7 @@ export const FISH = [
     },
   },
   {
-    id: 'blobfish', name: 'Blobfish', rarity: 3, hp: 76, atk: 11, spd: 2, pre: 'Blob', suf: 'blob',
+    id: 'blobfish', name: 'Blobfish', rarity: 3, hp: 76, atk: 11, spd: 2,
     eye: { x: 6, y: 2, size: 1 },
     build(v) {
       const P = 0xf2a7b8, P2 = 0xe58aa0;
@@ -285,7 +388,7 @@ export const FISH = [
     },
   },
   {
-    id: 'oarfish', name: 'Oarfish', rarity: 3, hp: 66, atk: 13, spd: 7, pre: 'Oar', suf: 'oar',
+    id: 'oarfish', name: 'Oarfish', rarity: 3, hp: 66, atk: 13, spd: 7,
     eye: { x: 16, y: -1, size: 1 },
     build(v) {
       const S = 0xd7dee6, R = 0xe2333a;
@@ -303,7 +406,7 @@ export const FISH = [
     },
   },
   {
-    id: 'shark', name: 'Shark', rarity: 3, hp: 62, atk: 16, spd: 10, pre: 'Shark', suf: 'shark',
+    id: 'shark', name: 'Shark', rarity: 3, hp: 62, atk: 16, spd: 10,
     eye: { x: 11, y: 1, size: 1 },
     build(v) {
       const top = 0x6f7f91;
@@ -320,9 +423,44 @@ export const FISH = [
       v.paint((p) => p.y === -3 && p.x >= 10 && mod(p.x + p.z, 2) === 0 && Math.abs(p.z) >= 2, W);
     },
   },
+  {
+    id: 'hammerhead', name: 'Hammerhead', rarity: 3, hp: 66, atk: 15, spd: 8,
+    eye: { x: 15, y: 0, size: 1 },
+    build(v) {
+      const F = 0x6a7a72, col = belly(0x7d8c84, 0xeef2f0, -1);
+      v.ellipsoid(0, 0, 0, 13, 4.5, 4, col);
+      v.ellipsoid(-11, 0, 0, 4, 2, 2, col);
+      v.ellipsoid(10, 0, 0, 4, 3.5, 3, col);
+      v.ellipsoid(14, 0, 0, 2.5, 1.8, 9, col);
+      v.polyXY([[3, 4], [-1, 13], [-3, 12], [-4, 4]], 0, 0, F);
+      v.polyXY([[-13, 0], [-20, 10], [-18, 1], [-17, -1], [-19, -6], [-14, -1]], 0, 0, F);
+      v.polyXZ([[4, 2], [-2, 9], [-4, 8], [0, 2]], -3, -3, F, true);
+      v.paint((p) => p.y === -1 && p.x >= 12 && Math.abs(p.z) <= 2, 0x3a2a2a);
+    },
+  },
+  {
+    id: 'coelacanth', name: 'Coelacanth', rarity: 3, hp: 70, atk: 13, spd: 5,
+    eye: { x: 10, y: 1, size: 2, white: 0xd0f0ff },
+    build(v) {
+      const col = (x, y, z) => (hash3(x, y, Math.abs(z)) < 0.1 ? 0xe8f0ff : 0x203a6a);
+      v.ellipsoid(0, 0, 0, 13, 5.5, 4, col);
+      for (const s of [1, -1]) {
+        v.capsule(5, -3, 3 * s, 2, -6, 7 * s, 1.2, 1, col);
+        v.ellipsoid(1, -7, 8 * s, 2, 1.2, 1, col);
+      }
+      v.capsule(-4, 5, 0, -7, 9, 0, 1.2, 1, col);
+      v.ellipsoid(-8, 10, 0, 2.5, 1.5, 0.6, col);
+      v.capsule(-4, -5, 0, -7, -9, 0, 1.2, 1, col);
+      v.ellipsoid(-8, -10, 0, 2.5, 1.5, 0.6, col);
+      v.polyXY([[-12, 0], [-17, 6], [-19, 0], [-17, -6]], 0, 0, col);
+      v.capsule(-13, 0, 0, -22, 0, 0, 1.2, 0.8, col);
+      v.ellipsoid(-22, 0, 0, 2, 1.5, 0.6, col);
+      v.polyXY([[2, 5], [0, 9], [-2, 5]], 0, 0, col);
+    },
+  },
   // ---------------- LEGENDARY ----------------
   {
-    id: 'whale', name: 'Whale', rarity: 4, hp: 110, atk: 18, spd: 4, pre: 'Whale', suf: 'whale',
+    id: 'whale', name: 'Whale', rarity: 4, hp: 110, atk: 18, spd: 4,
     eye: { x: 14, y: 0, size: 2 },
     build(v) {
       const top = 0x2f5d8a, bot = 0xbcd0e0, groove = 0x8fa7bb;
@@ -337,9 +475,59 @@ export const FISH = [
       v.paint((p) => p.y === -2 && p.x >= 10 && Math.abs(p.z) >= 3, 0x1c3a57);
     },
   },
+  {
+    id: 'narwhal', name: 'Narwhal', rarity: 4, hp: 100, atk: 21, spd: 6,
+    eye: { x: 10, y: 0, size: 1 },
+    build(v) {
+      const F = 0x6a747e;
+      const col = (x, y, z) => (y < -2 ? 0xe9edf0 : hash3(x, y, Math.abs(z)) < 0.3 ? 0x5a646e : 0x9aa4ae);
+      v.ellipsoid(0, 0, 0, 14, 6, 5.5, col);
+      v.ellipsoid(10, 0, 0, 6, 5, 5, col);
+      v.ellipsoid(-12, 0, 0, 6, 3, 2.5, col);
+      v.polyXZ([[-16, 0], [-21, 8], [-23, 7], [-20, 0]], 0, 0, F, true);
+      v.polyXZ([[6, 2], [2, 9], [0, 8], [3, 2]], -3, -3, F, true);
+      v.capsule(15, 1, 0, 32, 3, 0, 0.9, 0.5, (x) => (mod(x, 2) === 0 ? 0xf5ecd2 : 0xd8cba5));
+    },
+  },
+  {
+    id: 'orca', name: 'Orca', rarity: 4, hp: 115, atk: 20, spd: 7,
+    eye: { x: 11, y: 1, size: 1 },
+    build(v) {
+      const B = 0x161616;
+      const col = (x, y) => (y < -2 && x > -10 ? 0xf4f4f4 : B);
+      v.ellipsoid(0, 0, 0, 15, 6.5, 5.5, col);
+      v.ellipsoid(11, 0, 0, 6, 5, 4.5, col);
+      v.ellipsoid(-13, 0, 0, 6, 3, 2.5, col);
+      v.polyXY([[2, 5], [0, 15], [-2, 14], [-4, 5]], 0, 0, B);
+      v.polyXZ([[-17, 0], [-22, 8], [-24, 7], [-21, 0]], 0, 0, B, true);
+      v.polyXZ([[6, 3], [3, 9], [0, 9], [2, 3]], -4, -4, B, true);
+      v.paint((p) => p.x >= 6 && p.x <= 9 && p.y >= 1 && p.y <= 3 && Math.abs(p.z) >= 3, 0xf4f4f4);
+      v.paint((p) => p.x <= -2 && p.x >= -7 && p.y >= 5 && p.z !== 0, 0x8a8a8a);
+    },
+  },
+  {
+    id: 'squid', name: 'Colossal Squid', rarity: 4, hp: 125, atk: 19, spd: 5,
+    eye: { x: 6, y: 1, size: 3, white: 0xfff2a8, glow: true, pupil: 0x111111 },
+    build(v) {
+      const col = (x, y, z) => (hash3(x, y, Math.abs(z)) < 0.15 ? 0xa3222d : 0xc8323c);
+      const arm = (x, y, z) => (hash3(x, y, Math.abs(z)) < 0.07 ? 0xfff0e0 : 0xd94450);
+      v.ellipsoid(-8, 0, 0, 12, 5, 5, col);
+      v.polyXZ([[-13, 0], [-18, 8], [-21, 0]], -1, 0, col, true);
+      v.ellipsoid(5, 0, 0, 4, 4.5, 4.5, col);
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2, oy = Math.cos(a) * 2.5, oz = Math.sin(a) * 2.5, w = Math.sin(i * 2.3);
+        v.chain([[8, oy, oz, 1.2], [13, oy * 1.6 + w, oz * 1.6, 1], [18, oy * 2, oz * 2 + w, 0.8], [22, oy * 1.8 - w, oz * 2.2, 0.6]], arm);
+      }
+      for (const s of [1, -1]) {
+        v.chain([[8, -1, 1.5 * s, 0.8], [16, -3, 3 * s, 0.6], [26, -2, 4 * s, 0.6], [30, 0, 4 * s, 0.6]], arm);
+        v.ellipsoid(30, 0, 4 * s, 2, 1.4, 1.2, 0xa3222d);
+      }
+      for (const s of [1, -1]) v.set(4, -3, 4 * s, 0x9ff7ff, true);
+    },
+  },
   // ---------------- MYTHIC ----------------
   {
-    id: 'megalodon', name: 'Megalodon', rarity: 5, hp: 140, atk: 26, spd: 9, pre: 'Mega', suf: 'lodon',
+    id: 'megalodon', name: 'Megalodon', rarity: 5, hp: 140, atk: 26, spd: 9,
     eye: { x: 15, y: 2, size: 2, pupil: 0xff2a2a, white: 0x222222, glow: true },
     build(v) {
       const top = 0x3b4757;
@@ -464,10 +652,74 @@ export function mergeVoxels(a, b) {
 }
 
 // ---------- names & stats ----------
+// Name pieces for each fish: word starts (heads), word endings (tails) and a describing word.
+const NAMES = {
+  bluegill: [['Blue', 'Gill'], ['gill', 'blu'], 'Splashy'],
+  goldfish: [['Gold', 'Goldy'], ['goldie', 'glimmer'], 'Shiny'],
+  tuna: [['Tuna', 'Tun'], ['tuna', 'zoom'], 'Speedy'],
+  halibut: [['Hali', 'Flat'], ['ibut', 'flop'], 'Flat'],
+  needlefish: [['Needle', 'Pokey'], ['needle', 'stab'], 'Pointy'],
+  catfish: [['Cat', 'Whisker'], ['cat', 'whisker'], 'Whiskered'],
+  koi: [['Koi', 'Lucky'], ['koi', 'lucky'], 'Lucky'],
+  clownfish: [['Clown', 'Bozo'], ['clown', 'honk'], 'Silly'],
+  angelfish: [['Angel', 'Halo'], ['angel', 'halo'], 'Holy'],
+  parrotfish: [['Parrot', 'Squawk'], ['parrot', 'beak'], 'Chatty'],
+  boxfish: [['Box', 'Cube'], ['box', 'cube'], 'Blocky'],
+  eel: [['Eel', 'Zap'], ['eel', 'zap'], 'Shocking'],
+  urchin: [['Urchin', 'Spike'], ['urchin', 'spike'], 'Spiky'],
+  piranha: [['Pira', 'Chomp'], ['ranha', 'chomp'], 'Hungry'],
+  jellyfish: [['Jelly', 'Wobble'], ['jelly', 'wobble'], 'Wobbly'],
+  barracuda: [['Barra', 'Cuda'], ['cuda', 'barra'], 'Sneaky'],
+  pufferfish: [['Puff', 'Puffer'], ['puff', 'balloon'], 'Puffy'],
+  seahorse: [['Sea', 'Pony'], ['horse', 'pony'], 'Galloping'],
+  stingray: [['Sting', 'Glide'], ['ray', 'sting'], 'Gliding'],
+  stonefish: [['Stone', 'Rock'], ['stone', 'rock'], 'Rocky'],
+  sunfish: [['Sun', 'Mola'], ['sun', 'mola'], 'Sunny'],
+  lionfish: [['Lion', 'Mane'], ['lion', 'roar'], 'Roaring'],
+  swordfish: [['Sword', 'Blade'], ['sword', 'blade'], 'Stabby'],
+  anglerfish: [['Angler', 'Lantern'], ['angler', 'glow'], 'Glowing'],
+  blobfish: [['Blob', 'Goo'], ['blob', 'goo'], 'Squishy'],
+  oarfish: [['Oar', 'Ribbon'], ['oar', 'ribbon'], 'Wavy'],
+  shark: [['Shark', 'Jaw'], ['shark', 'jaws'], 'Fearsome'],
+  hammerhead: [['Hammer', 'Bonk'], ['hammer', 'bonk'], 'Bonking'],
+  coelacanth: [['Coela', 'Fossil'], ['canth', 'fossil'], 'Prehistoric'],
+  whale: [['Whale', 'Blubber'], ['whale', 'blub'], 'Giant'],
+  narwhal: [['Narwhal', 'Uni'], ['whal', 'corn'], 'Magical'],
+  orca: [['Orca', 'Killer'], ['orca', 'ka'], 'Savage'],
+  squid: [['Squid', 'Kraken'], ['squid', 'tacle'], 'Colossal'],
+  megalodon: [['Mega', 'Megalo'], ['lodon', 'don'], 'Ancient'],
+};
+const TITLES = [
+  ['Jr.', 'McSplash', 'the Wiggly', 'von Blub', 'the Snack', 'III', 'the Soggy'],
+  ['Jr.', 'McSplash', 'the Wiggly', 'von Blub', 'the Snack', 'III', 'the Soggy'],
+  ['Rex', 'the Great', 'Prime', 'of the Deep', 'the Brave', 'the Bold', 'Supreme'],
+  ['Rex', 'the Great', 'Prime', 'of the Deep', 'the Brave', 'the Bold', 'Supreme'],
+  ['the Destroyer', 'King of Tides', 'Overlord', 'the Unstoppable', 'Lord of the Abyss', 'Omega', 'the Titan'],
+  ['the Destroyer', 'King of Tides', 'Overlord', 'the Unstoppable', 'Lord of the Abyss', 'Omega', 'the Titan'],
+];
+
+function blend(head, tail) {
+  if (head.slice(-1).toLowerCase() === tail[0].toLowerCase()) tail = tail.slice(1);
+  return head + tail.toLowerCase();
+}
+
 export function mergeName(a, b) {
-  if (a.id === b.id) return a.id === 'megalodon' ? 'Ultra Megalodon' : 'King ' + a.name;
-  const n = a.pre + b.suf;
-  return n.charAt(0).toUpperCase() + n.slice(1).toLowerCase();
+  const h = Math.floor(hash3(FISH.findIndex((f) => f.id === a.id) * 31 + 7, FISH.findIndex((f) => f.id === b.id) * 17 + 3, 11) * 1000);
+  const na = NAMES[a.id], nb = NAMES[b.id];
+  const rarity = Math.max(a.rarity, b.rarity);
+  if (a.id === b.id) {
+    if (a.id === 'megalodon') return 'Ultra Megalodon';
+    if (a.id === 'narwhal') return 'Unicorn Narwhal';
+    return `${['King', 'Twin', 'Double', 'Mega'][h % 4]} ${a.name}`;
+  }
+  const name = blend(na[0][h % 2], nb[1][(h >> 1) % 2]);
+  const title = TITLES[rarity][(h >> 2) % TITLES[rarity].length];
+  switch ((h >> 4) % 4) {
+    case 0: return name;
+    case 1: return `${nb[2]} ${name}`;
+    case 2: return `${name} ${title}`;
+    default: return `${na[2]} ${blend(nb[0][0], na[1][0])}`;
+  }
 }
 
 export function makeCreature(a, b) {

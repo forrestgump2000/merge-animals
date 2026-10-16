@@ -8,9 +8,9 @@ A blocky, Minecraft-style fishing + merging + battle game built with three.js.
 4. **Pick the fighter** you think will win. Higher rarity = stronger, but underdogs pay more!
 5. Spend coins in the **Bait Shop** on better bait for rarer fish (Megalodon is Mythic!).
 
-22 voxel fish: Bluegill, Goldfish, Tuna, Halibut, Needlefish, Clownfish, Angelfish, Parrotfish, Boxfish,
-Eel, Sea Urchin, Pufferfish, Seahorse, Stingray, Stonefish, Sunfish, Anglerfish, Blobfish, Oarfish,
-Shark, Whale and Megalodon.
+34 voxel sea creatures: Bluegill, Goldfish, Tuna, Halibut, Needlefish, Catfish, Koi, Clownfish, Angelfish, Parrotfish, Boxfish,
+Eel, Sea Urchin, Piranha, Jellyfish, Barracuda, Pufferfish, Seahorse, Stingray, Stonefish, Sunfish, Lionfish, Swordfish,
+Anglerfish, Blobfish, Oarfish, Shark, Hammerhead, Coelacanth, Whale, Narwhal, Orca, Colossal Squid and Megalodon.
 
 ## Develop
 
