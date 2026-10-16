@@ -7,7 +7,7 @@ import { pixelIcon } from './icons.js';
 
 // ---------------- save data ----------------
 const SAVE_KEY = 'mergeAnimals.save.v1';
-const save = { coins: 50, bait: {}, using: 'worm', caught: {}, merges: {}, wins: 0, losses: 0 };
+const save = { coins: 50, bait: {}, using: 'worm', caught: {}, merges: {}, wins: 0, losses: 0, tank: [] };
 try { Object.assign(save, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}')); } catch {}
 const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch {} };
 
@@ -151,6 +151,68 @@ const nameTag = (name, i) => `<span style="color:${rar(i).color}">${name}</span>
 const coinImg = () => `<img class="ico" src="${pixelIcon('coin')}" alt="">`;
 
 // ---------------- HUD ----------------
+// ---------------- selling ----------------
+const TANK_MAX = 40;
+// winners in the Tank are battle veterans and sell for double
+function sellPrice(c, veteran = false) {
+  return Math.max(2, Math.round(c.value * (veteran ? 4 : 2) * (1 + c.rarity * 0.15)));
+}
+
+async function sellCurrent() {
+  if (G.busy) return;
+  G.busy = true;
+  render();
+  const a = G.cActors[G.team], c = G.creatures[G.team];
+  const price = sellPrice(c);
+  a.label?.remove(); a.label = null;
+  a.model.group.getWorldPosition(tmpV);
+  world.burst(tmpV.clone(), 40, 0xffd700, 3);
+  sfx.coin();
+  const s0 = a.model.group.scale.x;
+  await tween(500, (e) => { a.model.group.scale.setScalar(s0 * (1 - e)); a.model.group.rotation.y = e * Math.PI * 3; }, ease.in);
+  removeActor(a);
+  G.cActors[G.team] = null;
+  G.creatures[G.team] = null;
+  save.coins += price;
+  persist();
+  toast(`Sold ${nameTag(c.name, c.rarity)} for ${coinImg()}${price}!`);
+  G.fish = [null, null];
+  G.busy = false;
+  G.phase = 'roll0';
+  render();
+}
+
+function openTank() {
+  const p = $('panel');
+  p.className = 'panel';
+  const total = save.tank.reduce((s, c) => s + sellPrice(c, true), 0);
+  p.innerHTML = `<div class="ptitle">Your Tank <small>${save.tank.length}/${TANK_MAX} · ${coinImg()}${save.coins}</small></div>
+    <div class="hint dark">Creatures that win battles for you live here. Sell them for coins!</div>
+    <div class="tank">${save.tank.length ? save.tank.map((c, i) => `<div class="bait">
+      <div class="binfo"><div class="bname" style="color:${RARITIES[c.rarity].color}">${c.name}</div>
+      <div class="bdesc">${c.a} + ${c.b} · ${RARITIES[c.rarity].name} · ❤ ${c.hp} ⚔ ${c.atk}</div></div>
+      <button class="mc-btn small" data-sell="${i}">Sell ${coinImg()}${sellPrice(c, true)}</button></div>`).join('')
+      : '<div class="empty-tank">Empty! Win a battle to add your fighter here.</div>'}</div>
+    ${save.tank.length > 1 ? `<button class="mc-btn gold close" id="sellAll">Sell All for ${coinImg()}${total}</button>` : ''}
+    <button class="mc-btn close" id="closeModal">Close</button>`;
+  p.querySelectorAll('[data-sell]').forEach((b) => (b.onclick = () => {
+    const c = save.tank.splice(Number(b.dataset.sell), 1)[0];
+    save.coins += sellPrice(c, true);
+    persist(); sfx.coin(); updateHud();
+    toast(`Sold ${nameTag(c.name, c.rarity)}!`);
+    openTank();
+  }));
+  if ($('sellAll')) $('sellAll').onclick = () => {
+    save.coins += total;
+    save.tank = [];
+    persist(); sfx.coin(); updateHud();
+    toast(`Sold everything for ${coinImg()}${total}!`);
+    openTank();
+  };
+  $('closeModal').onclick = closeModal;
+  $('modal').hidden = false;
+}
+
 function updateHud() {
   $('coins').textContent = save.coins;
   const b = BAITS.find((x) => x.id === save.using) || BAITS[0];
@@ -204,9 +266,12 @@ function render() {
   } else if (p === 'merged') {
     const c = G.creatures[G.team];
     setMsg(creatureCard(c));
-    setActions(G.team === 0
-      ? [{ label: 'Make Creature 2 ▶', cls: 'big', onClick: nextCreature }]
-      : [{ label: '⚔ Choose Your Fighter', cls: 'big gold', onClick: toFight }]);
+    setActions([
+      G.team === 0
+        ? { label: 'Make Creature 2 ▶', cls: 'big', onClick: nextCreature }
+        : { label: '⚔ Choose Your Fighter', cls: 'big gold', onClick: toFight },
+      { label: `💰 Sell ${coinImg()}${sellPrice(c)}`, onClick: sellCurrent },
+    ]);
   } else if (p === 'pick') {
     const [c0, c1] = G.creatures;
     setMsg(`<div class="hint">Who will win? Pick your fighter! Underdogs pay more.</div>`);
@@ -528,14 +593,19 @@ async function battle(pick) {
   W.inner.rotation.x = 0;
   const won = winner === pick;
   const wc = G.creatures[winner];
+  let tankMsg = '';
   if (won) {
+    if (save.tank.length < TANK_MAX) {
+      save.tank.push({ name: wc.name, rarity: wc.rarity, value: wc.value, hp: wc.hp, atk: wc.atk, a: wc.a.name, b: wc.b.name });
+      tankMsg = `<div class="hint">🏆 ${nameTag(wc.name, wc.rarity)} joined your Tank! Sell it there for ${coinImg()}${sellPrice(wc, true)}.</div>`;
+    } else tankMsg = `<div class="hint">Your Tank is full! Sell some creatures to make room.</div>`;
     const pay = G.payout[pick];
     save.coins += pay;
     save.wins++;
     sfx.win();
     setTimeout(sfx.coin, 600);
     for (let i = 0; i < 4; i++) setTimeout(() => world.burst(new THREE.Vector3((Math.random() - 0.5) * 4, 2, 0), 18, 0xffd700, 3), i * 150);
-    setMsg(`<div class="result win">YOU WIN!</div><div class="hint">${nameTag(wc.name, wc.rarity)} won the battle. +${coinImg()}${pay} coins</div>`);
+    setMsg(`<div class="result win">YOU WIN!</div><div class="hint">${nameTag(wc.name, wc.rarity)} won the battle. +${coinImg()}${pay} coins</div>${tankMsg}`);
   } else {
     save.losses++;
     sfx.lose();
@@ -658,6 +728,7 @@ window.addEventListener('pointerup', () => (drag = null));
 $('shopBtn').onclick = () => { sfx.click(); openShop(); };
 $('baitBtn').onclick = () => { sfx.click(); openShop(); };
 $('dexBtn').onclick = () => { sfx.click(); openDex(); };
+$('tankBtn').onclick = () => { sfx.click(); openTank(); };
 $('muteBtn').onclick = () => { toggleMute(); updateHud(); sfx.click(); };
 $('modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeModal(); });
 

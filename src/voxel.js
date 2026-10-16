@@ -118,8 +118,12 @@ export class VB {
       this.capsule(ax, ay, az, bx, by, bz, ar, br, col, opt);
     }
   }
-  paint(pred, col) {
-    for (const v of this.m.values()) if (pred(v)) v.c = colorAt(col, v.x, v.y, v.z);
+  paint(pred, col, glow) {
+    for (const v of this.m.values())
+      if (pred(v)) {
+        v.c = colorAt(col, v.x, v.y, v.z);
+        if (glow !== undefined) v.g = glow;
+      }
   }
   removeIf(pred) {
     for (const [k, v] of this.m) if (pred(v)) this.m.delete(k);

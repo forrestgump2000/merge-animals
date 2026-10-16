@@ -551,6 +551,219 @@ export const FISH = [
   },
 ];
 
+// ---------------- MORE SEA CREATURES (new shapes) ----------------
+FISH.push(
+  {
+    id: 'starfish', name: 'Starfish', rarity: 0, hp: 26, atk: 4, spd: 1, tilt: 0.9,
+    eye: { mode: 'top', x: 2, z: 1, size: 1 },
+    build(v) {
+      const col = (x, y, z) => (hash3(x, y, Math.abs(z)) < 0.12 ? 0xffe0b0 : 0xff8c42);
+      for (let i = 0; i < 5; i++) {
+        const a = (i / 5) * Math.PI * 2;
+        v.capsule(0, 0, 0, Math.cos(a) * 10, 0, Math.sin(a) * 10, 2.6, 0.8, col);
+      }
+      v.ellipsoid(0, 0, 0, 3.5, 2, 3.5, col);
+      v.removeIf((p) => p.y < -1 || p.y > 1);
+    },
+  },
+  {
+    id: 'octopus', name: 'Octopus', rarity: 2, hp: 47, atk: 11, spd: 6,
+    eye: { x: 2, y: 2, size: 2, white: 0xfff2c0 },
+    build(v) {
+      const col = (x, y, z) => (hash3(x, y, Math.abs(z)) < 0.15 ? 0xc0502a : 0xe0703a);
+      v.ellipsoid(-3, 4, 0, 6, 6, 5.5, col);
+      v.ellipsoid(0, -1, 0, 4, 3, 4, col);
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2 + 0.2, c = Math.cos(a), s = Math.sin(a), w = Math.sin(i * 2.1);
+        v.chain([[c * 3, -2, s * 3, 1.3], [c * 7, -6, s * 7, 1], [c * 10 + w, -9, s * 10, 0.8], [c * 12, -7, s * 12 + w, 0.6]],
+          (x, y, z) => (y < -4 && hash3(x, y, Math.abs(z)) < 0.3 ? 0xffd2b8 : 0xe0703a));
+      }
+    },
+  },
+  {
+    id: 'turtle', name: 'Sea Turtle', rarity: 2, hp: 60, atk: 9, spd: 4,
+    eye: { x: 13, y: 1, size: 1 },
+    build(v) {
+      const shell = (x, y, z) => (y < -1 ? 0xe8d9a0 : mod(x + Math.abs(z), 5) === 0 || mod(x - Math.abs(z), 5) === 0 ? 0x4a3a1a : 0x6b8a3a);
+      const skin = (x, y, z) => (hash3(x, y, Math.abs(z)) < 0.2 ? 0x8aa86a : 0x6f8f4f);
+      v.ellipsoid(0, 1, 0, 10, 4, 8, shell);
+      v.capsule(8, 0, 0, 11, 0.5, 0, 1.8, 1.8, skin);
+      v.ellipsoid(12.5, 0.5, 0, 3, 2.5, 2.5, skin);
+      v.polyXZ([[5, 6], [2, 16], [-1, 15], [1, 6]], -1, -1, skin, true);
+      v.polyXZ([[-7, 5], [-11, 9], [-12, 7], [-8, 4]], -1, -1, skin, true);
+      v.capsule(-9, 0, 0, -12, -0.5, 0, 1, 0.6, skin);
+    },
+  },
+);
+
+// ---------------- VARIETIES (recolored / remixed versions of a base fish) ----------------
+// map: base color -> new color (or [color, true] to make it glow)
+function V(baseId, o) {
+  const base = FISH.find((f) => f.id === baseId);
+  return {
+    id: o.id, name: o.name, rarity: o.r, hp: o.hp, atk: o.atk, spd: o.spd ?? base.spd,
+    tilt: base.tilt, eye: { ...base.eye, ...(o.eye || {}) }, base: baseId, word: o.w, adj: o.adj,
+    build(v) {
+      base.build(v);
+      if (o.map) {
+        const map = new Map(Object.entries(o.map).map(([k, val]) => [Number(k), val]));
+        for (const p of v.m.values()) {
+          const m = map.get(p.c);
+          if (m === undefined) continue;
+          if (Array.isArray(m)) { p.c = m[0]; p.g = true; } else p.c = m;
+        }
+      }
+      o.extra?.(v);
+    },
+  };
+}
+const spots = (pred, rate, col, glow) => (v) => v.paint((p) => pred(p) && hash3(p.x, p.y, Math.abs(p.z)) < rate, col, glow);
+
+FISH.push(
+  // ----- common -----
+  V('tuna', { id: 'mackerel', name: 'Mackerel', r: 0, hp: 22, atk: 5, spd: 9, w: 'Mack', adj: 'Stripy',
+    map: { 0x1f3b73: 0x1f6f5f, 0x8fa3b8: 0xc0d0dc, 0xf2c80f: 0x8fa3b8 },
+    extra: (v) => v.paint((p) => p.y > 1 && mod(p.x + p.y * 2, 4) === 0, 0x0f2f2a) }),
+  V('tuna', { id: 'salmon', name: 'Salmon', r: 0, hp: 25, atk: 5, spd: 8, w: 'Salmo', adj: 'Leaping',
+    map: { 0x1f3b73: 0x6a7f8f, 0x8fa3b8: 0xf0a0a0, 0xdfe6ec: 0xf5e6e6, 0xf2c80f: 0x8a9aa8 },
+    extra: spots((p) => p.y > 1, 0.12, 0x1a1a1a) }),
+  V('tuna', { id: 'trout', name: 'Rainbow Trout', r: 0, hp: 24, atk: 5, spd: 8, w: 'Trout', adj: 'Rainbow',
+    map: { 0x1f3b73: 0x5a6b3a, 0x8fa3b8: 0xff8fa3, 0xdfe6ec: 0xf0f0e0, 0xf2c80f: 0x7a8a5a },
+    extra: spots((p) => p.y > -2, 0.08, 0x1a1a1a) }),
+  V('tuna', { id: 'bass', name: 'Largemouth Bass', r: 0, hp: 27, atk: 6, spd: 6, w: 'Bass', adj: 'Bassy',
+    map: { 0x1f3b73: 0x3d5a2a, 0x8fa3b8: 0x7a9a4a, 0xdfe6ec: 0xe8e8c8, 0xf2c80f: 0x4a6a2a },
+    extra: spots((p) => p.y === 0 && Math.abs(p.z) >= 3, 0.5, 0x2a3a1a) }),
+  V('tuna', { id: 'sardine', name: 'Sardine', r: 0, hp: 18, atk: 5, spd: 10, w: 'Sardi', adj: 'Tiny',
+    map: { 0x1f3b73: 0x2a5a8a, 0x8fa3b8: 0xd8e4ee, 0xdfe6ec: 0xffffff, 0xf2c80f: 0x9ab0c4 } }),
+  V('bluegill', { id: 'pumpkinseed', name: 'Pumpkinseed', r: 0, hp: 23, atk: 5, w: 'Pumpkin', adj: 'Spooky',
+    map: { 0xf0a838: 0xff7b1c, 0x3f6b5a: 0x5f7a3a, 0x6b8f5e: 0x9fb05a, 0x1b2a5a: 0xff2a2a } }),
+  V('halibut', { id: 'flounder', name: 'Flounder', r: 0, hp: 26, atk: 4, w: 'Floun', adj: 'Sandy',
+    map: { 0x6b5b45: 0xa68f62, 0x8a7558: 0xc4ad7c }, extra: spots((p) => p.y > 0, 0.08, 0x4a3a2a) }),
+  V('goldfish', { id: 'blackmoor', name: 'Black Moor', r: 0, hp: 23, atk: 4, w: 'Moor', adj: 'Gloomy',
+    map: { 0xf28c28: 0x1e1e22, 0xffb347: 0x2e2e36, 0xfff1d6: 0x55555f }, eye: { size: 3 } }),
+  V('goldfish', { id: 'calico', name: 'Calico Goldfish', r: 0, hp: 22, atk: 5, w: 'Calico', adj: 'Patchy',
+    extra: (v) => v.paint(() => true, (x, y, z) => [0xff8c28, 0x1e1e22, 0xfaf6ef][Math.floor(hash3(Math.floor(x / 3), Math.floor(y / 3), Math.floor(Math.abs(z) / 3)) * 3)]) }),
+  V('jellyfish', { id: 'moonjelly', name: 'Moon Jelly', r: 0, hp: 24, atk: 4, w: 'Moon', adj: 'Moonlit',
+    map: { 0xffb3e6: 0xdff2ff, 0xf78fd0: 0xc7e6ff, 0xe86bbf: 0xa8d4ff, 0xff7ac8: 0xff9ad5, 0xffc2ea: 0xe8f6ff } }),
+  V('eel', { id: 'gardeneel', name: 'Garden Eel', r: 0, hp: 20, atk: 6, w: 'Garden', adj: 'Peeking',
+    map: { 0x4f7f2a: 0xf2efe6, 0x2f4f18: 0x1a1a1a } }),
+  // ----- uncommon -----
+  V('clownfish', { id: 'blackclown', name: 'Black Clownfish', r: 1, hp: 32, atk: 8, w: 'Shadow', adj: 'Midnight',
+    map: { 0xff7b1c: 0x1c1c1c } }),
+  V('clownfish', { id: 'maroonclown', name: 'Maroon Clownfish', r: 1, hp: 34, atk: 8, w: 'Maroon', adj: 'Grumpy',
+    map: { 0xff7b1c: 0x7a0f1e, 0xffffff: 0xfff3c4 } }),
+  V('tuna', { id: 'bluefin', name: 'Bluefin Tuna', r: 1, hp: 34, atk: 8, spd: 10, w: 'Bluefin', adj: 'Turbo',
+    map: { 0x1f3b73: 0x0f1f4f, 0x8fa3b8: 0x7a8a9f, 0xf2c80f: 0xffd700 } }),
+  V('shark', { id: 'lemonshark', name: 'Lemon Shark', r: 1, hp: 36, atk: 9, w: 'Lemon', adj: 'Sour',
+    map: { 0x6f7f91: 0xc9b26b } }),
+  V('shark', { id: 'nurseshark', name: 'Nurse Shark', r: 1, hp: 38, atk: 8, spd: 4, w: 'Nurse', adj: 'Sleepy',
+    map: { 0x6f7f91: 0x9a7a52, 0xeef2f5: 0xe0cfb0 },
+    extra: (v) => { for (const s of [1, -1]) v.capsule(13, -1, s, 15, -4, s, 0.6, 0.5, 0x6a5232); } }),
+  V('hammerhead', { id: 'bonnethead', name: 'Bonnethead', r: 1, hp: 35, atk: 9, w: 'Bonnet', adj: 'Fancy',
+    map: { 0x7d8c84: 0x8a7d6a, 0x6a7a72: 0x7a6d5a } }),
+  V('catfish', { id: 'bluecat', name: 'Blue Catfish', r: 1, hp: 36, atk: 7, w: 'Bluecat', adj: 'Moody',
+    map: { 0x6b6152: 0x4f6a85, 0x5a5244: 0x3d5670 } }),
+  V('eel', { id: 'ribboneel', name: 'Ribbon Eel', r: 1, hp: 30, atk: 9, w: 'Ribbon', adj: 'Twirly',
+    map: { 0x4f7f2a: 0x1f5fd6, 0x2f4f18: 0xffd60a } }),
+  V('boxfish', { id: 'cowfish', name: 'Cowfish', r: 1, hp: 40, atk: 6, w: 'Cow', adj: 'Mooing',
+    extra: (v) => { for (const s of [1, -1]) { v.capsule(6, 4, 2 * s, 10, 7, 2 * s, 0.7, 0.5, 0xffd60a); v.capsule(-6, -4, 2 * s, -9, -6, 2 * s, 0.7, 0.5, 0xffd60a); } } }),
+  V('seahorse', { id: 'pygmyhorse', name: 'Pygmy Seahorse', r: 1, hp: 30, atk: 8, w: 'Pygmy', adj: 'Itty-Bitty',
+    map: { 0xf4a259: 0xff9ec4, 0xd9822b: 0xff6fa8, 0xf8c48a: 0xffc4dc, 0xffd29a: 0xffb3d1 },
+    extra: spots(() => true, 0.15, 0xd94a8a) }),
+  V('urchin', { id: 'redurchin', name: 'Red Urchin', r: 1, hp: 38, atk: 7, w: 'Ruby', adj: 'Prickly',
+    map: { 0x4b1d5e: 0x8a1a1a, 0x6a2c8a: 0xa82a2a, 0x7a3a9a: 0xc83a3a, 0xc89be0: 0xff8a7a } }),
+  // ----- rare -----
+  V('shark', { id: 'mako', name: 'Mako Shark', r: 2, hp: 46, atk: 13, spd: 11, w: 'Mako', adj: 'Lightning',
+    map: { 0x6f7f91: 0x2f4f8f } }),
+  V('shark', { id: 'blueshark', name: 'Blue Shark', r: 2, hp: 48, atk: 12, w: 'Azure', adj: 'Sapphire',
+    map: { 0x6f7f91: 0x2f6fe0 } }),
+  V('pufferfish', { id: 'spottedpuffer', name: 'Spotted Puffer', r: 2, hp: 54, atk: 9, w: 'Dotty', adj: 'Dotted',
+    map: { 0xd9b45a: 0x5a4a3a, 0x7a5a2a: 0xffffff, 0xf2e2b0: 0x8a7a6a }, extra: spots((p) => p.y >= -1, 0.15, 0xffffff) }),
+  V('angelfish', { id: 'emperorangel', name: 'Emperor Angelfish', r: 2, hp: 44, atk: 10, w: 'Emperor', adj: 'Royal',
+    map: { 0xffd23f: 0x1b3fa0, 0x2b59c3: 0xffd23f } }),
+  V('parrotfish', { id: 'rainbowparrot', name: 'Rainbow Parrotfish', r: 2, hp: 46, atk: 10, w: 'Rainbow', adj: 'Dazzling',
+    extra: (v) => v.paint((p) => p.c !== 0xf3e9d2 && p.c !== 0xb8a98a, (x) => [0xff4d4d, 0xff9f1c, 0xffe14d, 0x4dd17a, 0x3fa0ff, 0xa45cff][mod(Math.floor(x / 3), 6)]) }),
+  V('eel', { id: 'electriceel', name: 'Electric Eel', r: 2, hp: 42, atk: 14, w: 'Volt', adj: 'Electric',
+    map: { 0x4f7f2a: 0x2a2a2e, 0x2f4f18: [0xffe14d, true] } }),
+  V('stingray', { id: 'eagleray', name: 'Spotted Eagle Ray', r: 2, hp: 46, atk: 11, w: 'Eagle', adj: 'Soaring',
+    map: { 0x7d6e63: 0x1d2433, 0x5b4f47: 0xf0f0f0 }, extra: (v) => v.paint((p) => p.x < -7, 0x1d2433) }),
+  V('koi', { id: 'goldenkoi', name: 'Golden Koi', r: 2, hp: 44, atk: 10, w: 'Golden', adj: 'Golden',
+    map: { 0xff5a1f: 0xffc93c, 0xfaf6ef: 0xffe9a3, 0x1a1a1a: 0xd4a017, 0xffe0cc: 0xfff2b0 } }),
+  V('catfish', { id: 'albinocat', name: 'Albino Catfish', r: 2, hp: 48, atk: 9, w: 'Albino', adj: 'Ghostly',
+    map: { 0x6b6152: 0xf5d9d9, 0x5a5244: 0xf0c4c4, 0xd9cfb8: 0xffffff, 0x3d362c: 0xffb3b3 }, eye: { pupil: 0xff2a2a } }),
+  V('piranha', { id: 'blackpiranha', name: 'Black Piranha', r: 2, hp: 42, atk: 14, w: 'Onyx', adj: 'Ravenous',
+    map: { 0x7d8a96: 0x26262c, 0xb8c4cf: 0x3a3a44, 0xd62828: 0x3a3a44, 0x4a535c: 0x1a1a1f }, eye: { white: 0xff2a2a } }),
+  V('barracuda', { id: 'greatbarracuda', name: 'Great Barracuda', r: 2, hp: 44, atk: 14, w: 'Great', adj: 'Sly',
+    map: { 0x4a5866: 0x1a1f26, 0x9aaab8: 0x7d8fa0 }, extra: spots((p) => p.y < 0, 0.06, 0x1a1f26) }),
+  V('orca', { id: 'dolphin', name: 'Dolphin', r: 2, hp: 50, atk: 11, spd: 10, w: 'Dolph', adj: 'Playful',
+    map: { 0x161616: 0x7a8a99, 0xf4f4f4: 0xdfe6ea, 0x8a8a8a: 0x7a8a99 },
+    extra: (v) => { v.paint((p) => p.x >= 6 && p.x <= 9 && p.y >= 1 && p.y <= 3, 0x7a8a99); v.capsule(16, -1, 0, 21, -1.5, 0, 2, 1.4, 0x7a8a99); } }),
+  V('tuna', { id: 'flyingfish', name: 'Flying Fish', r: 2, hp: 40, atk: 11, spd: 11, w: 'Fly', adj: 'Flying',
+    map: { 0x1f3b73: 0x1f4fa0, 0xf2c80f: 0x9fd3ff },
+    extra: (v) => v.polyXZ([[4, 2], [-6, 14], [-10, 12], [-2, 2]], 0, 0, 0x9fd3ff, true) }),
+  V('jellyfish', { id: 'boxjelly', name: 'Box Jelly', r: 2, hp: 40, atk: 14, w: 'Cube', adj: 'Stinging',
+    map: { 0xffb3e6: 0xbff8ff, 0xf78fd0: 0x9fefff, 0xe86bbf: 0x6fe0ff, 0xff7ac8: 0x8fe8ff, 0xffc2ea: [0x7ff7ff, true] } }),
+  // ----- epic -----
+  V('shark', { id: 'tigershark', name: 'Tiger Shark', r: 3, hp: 68, atk: 17, w: 'Tiger', adj: 'Striped',
+    map: { 0x6f7f91: 0x7a7560 }, extra: (v) => v.paint((p) => p.y > 0 && mod(p.x, 3) === 0, 0x3a3528) }),
+  V('shark', { id: 'goblinshark', name: 'Goblin Shark', r: 3, hp: 64, atk: 17, w: 'Goblin', adj: 'Creepy',
+    map: { 0x6f7f91: 0xd99aa0, 0xeef2f5: 0xf5d0d4 },
+    extra: (v) => v.capsule(12, 1, 0, 21, 1.5, 0, 1.6, 0.6, 0xd99aa0) }),
+  V('shark', { id: 'bullshark', name: 'Bull Shark', r: 3, hp: 76, atk: 15, spd: 7, w: 'Bull', adj: 'Stubborn',
+    map: { 0x6f7f91: 0x6e6a62 }, extra: (v) => v.ellipsoid(2, -0.5, 0, 9, 5, 5, (x, y) => (y < -1 ? 0xeef2f5 : 0x6e6a62)) }),
+  V('stingray', { id: 'manta', name: 'Manta Ray', r: 3, hp: 74, atk: 13, w: 'Manta', adj: 'Majestic',
+    map: { 0x7d6e63: 0x1f1f24, 0x5b4f47: 0x2f2f36 },
+    extra: (v) => { for (const s of [1, -1]) v.capsule(8, 0, 3 * s, 12, 0, 4 * s, 1, 0.8, 0x1f1f24); } }),
+  V('seahorse', { id: 'seadragon', name: 'Leafy Sea Dragon', r: 3, hp: 62, atk: 14, w: 'Dragon', adj: 'Leafy',
+    map: { 0xf4a259: 0xc8d44a, 0xd9822b: 0x9ab03a, 0xf8c48a: 0xe8e070, 0xffd29a: 0x7a9a2a },
+    extra: (v) => { for (const [x, y] of [[0, 8], [-2, 4], [-3, 0], [-2, -4], [-4, -8], [3, 13], [4, 4]]) v.polyXY([[x, y], [x - 4, y + 3], [x - 3, y + 5], [x - 1, y + 2]], 0, 0, 0x7a9a2a); } }),
+  V('jellyfish', { id: 'lionsmane', name: "Lion's Mane Jelly", r: 3, hp: 66, atk: 15, w: 'Mane', adj: 'Fiery',
+    map: { 0xffb3e6: 0xff9a4d, 0xf78fd0: 0xe0602a, 0xe86bbf: 0xc0401a, 0xff7ac8: 0xff7040, 0xffc2ea: 0xffb070 } }),
+  V('swordfish', { id: 'bluemarlin', name: 'Blue Marlin', r: 3, hp: 66, atk: 17, spd: 11, w: 'Marlin', adj: 'Swift',
+    map: { 0x34407a: 0x1a3fa8, 0x2a3366: 0x10286a }, extra: (v) => v.paint((p) => p.y > 0 && mod(p.x, 4) === 0 && p.x < 12, 0x6fa8ff) }),
+  V('swordfish', { id: 'sailfish', name: 'Sailfish', r: 3, hp: 62, atk: 16, spd: 12, w: 'Sail', adj: 'Sailing',
+    map: { 0x34407a: 0x2a4a9a },
+    extra: (v) => v.polyXY([[8, 4], [6, 14], [-6, 15], [-10, 4]], 0, 0, (x, y) => (hash3(x, y, 1) < 0.15 ? 0x0a1a4a : 0x3a5ac0)) }),
+  V('whale', { id: 'beluga', name: 'Beluga', r: 3, hp: 80, atk: 13, w: 'Belu', adj: 'Chirpy',
+    map: { 0x2f5d8a: 0xeef1f4, 0xbcd0e0: 0xffffff, 0x8fa7bb: 0xdde3e8, 0x1c3a57: 0x9aa4ae },
+    extra: (v) => v.ellipsoid(16, 2, 0, 4, 4, 4, 0xf4f6f8) }),
+  V('squid', { id: 'giantsquid', name: 'Giant Squid', r: 3, hp: 72, atk: 15, w: 'Giant', adj: 'Tentacled',
+    map: { 0xa3222d: 0xb0485a, 0xc8323c: 0xe07a8a, 0xd94450: 0xf09aa5 } }),
+  V('anglerfish', { id: 'abyssal', name: 'Abyssal Angler', r: 3, hp: 70, atk: 16, w: 'Abyss', adj: 'Abyssal',
+    map: { 0x3a2e2b: 0x0d0d1a, 0x4d3c36: 0x1a1a33, 0x3a0a0a: 0x0a0a2a, 0x5a4a40: 0x22224a, 0xfff27a: [0x3fe0ff, true] } }),
+  // ----- legendary -----
+  V('shark', { id: 'greatwhite', name: 'Great White Shark', r: 4, hp: 118, atk: 22, spd: 9, w: 'White', adj: 'Terrifying',
+    map: { 0x6f7f91: 0x5d6670 },
+    extra: (v) => v.paint((p) => p.y === -2 && p.x >= 10 && Math.abs(p.z) >= 2 && mod(p.x + p.z, 2) === 0, 0xffffff) }),
+  V('shark', { id: 'whaleshark', name: 'Whale Shark', r: 4, hp: 135, atk: 16, spd: 4, w: 'Spotty', adj: 'Gentle',
+    map: { 0x6f7f91: 0x2c3e5a },
+    extra: (v) => v.paint((p) => p.y > -1 && mod(p.x, 3) === 0 && mod(p.y + Math.abs(p.z), 3) === 0, 0xeaf2ff) }),
+  V('whale', { id: 'humpback', name: 'Humpback Whale', r: 4, hp: 120, atk: 18, w: 'Hump', adj: 'Singing',
+    map: { 0x2f5d8a: 0x2b2f36, 0xbcd0e0: 0xd0d4d8, 0x8fa7bb: 0x9aa0a8 },
+    extra: (v) => { v.polyXZ([[8, 2], [2, 16], [-1, 15], [4, 2]], -4, -4, 0xeeeeee, true); spots((p) => p.x > 8 && p.y > 2, 0.25, 0x6a6f78)(v); } }),
+  V('whale', { id: 'spermwhale', name: 'Sperm Whale', r: 4, hp: 130, atk: 20, w: 'Boxhead', adj: 'Boxy',
+    map: { 0x2f5d8a: 0x5a5552, 0xbcd0e0: 0x8a8480, 0x8fa7bb: 0x7a7470 },
+    extra: (v) => v.box(12, -4, -5, 22, 5, 5, 0x5a5552), eye: { x: 13 } }),
+  V('tuna', { id: 'arowana', name: 'Golden Arowana', r: 4, hp: 105, atk: 21, spd: 8, w: 'Arowa', adj: 'Lucky',
+    map: { 0x1f3b73: 0xc9a227, 0x8fa3b8: 0xffd75e, 0xdfe6ec: 0xfff1b0, 0xf2c80f: 0xff9f1c },
+    extra: (v) => v.paint((p) => p.c === 0xffd75e && mod(p.x + p.y, 2) === 0, 0xe8b830) }),
+  // ----- mythic -----
+  V('squid', { id: 'kraken', name: 'Kraken', r: 5, hp: 150, atk: 25, spd: 6, w: 'Kraken', adj: 'Legendary',
+    map: { 0xa3222d: 0x3d1a5c, 0xc8323c: 0x5a2a8a, 0xd94450: 0x6e3aa8, 0xfff0e0: [0x7fffd4, true] }, eye: { white: 0x7fffd4 } }),
+  V('megalodon', { id: 'lavamega', name: 'Lava Megalodon', r: 5, hp: 145, atk: 28, w: 'Magma', adj: 'Molten',
+    map: { 0x3b4757: 0x1a1414, 0xc9ced6: 0x3a2a26, 0x8a94a3: [0xff6a00, true], 0x232b36: [0xff3d00, true], 0x5a0f0f: [0xff4500, true] },
+    extra: spots((p) => p.y > -2, 0.07, 0xff8c1a, true), eye: { pupil: 0xffd000 } }),
+  V('megalodon', { id: 'ghostmega', name: 'Ghost Megalodon', r: 5, hp: 135, atk: 27, spd: 11, w: 'Ghost', adj: 'Haunted',
+    map: { 0x3b4757: 0xcfe3ea, 0xc9ced6: 0xffffff, 0x8a94a3: 0xa8d8e8, 0x232b36: 0x9cc7d6, 0x5a0f0f: 0x2a3a4a },
+    eye: { pupil: 0x3fffff, white: 0xa8d8e8 } }),
+  V('oarfish', { id: 'leviathan', name: 'Leviathan', r: 5, hp: 140, atk: 26, spd: 9, w: 'Levia', adj: 'Mighty',
+    map: { 0xd7dee6: 0x0f4a5a, 0x8a97a6: 0x0a3340, 0xe2333a: [0x3ff5ff, true] }, eye: { size: 2, pupil: 0x3ff5ff, glow: true } }),
+  V('whale', { id: 'cosmicwhale', name: 'Cosmic Whale', r: 5, hp: 160, atk: 23, w: 'Cosmo', adj: 'Cosmic',
+    map: { 0x2f5d8a: 0x2a1458, 0xbcd0e0: 0x5a3aa8, 0x8fa7bb: 0x7a5ad0, 0x1c3a57: 0x120830 },
+    extra: (v) => { spots(() => true, 0.05, 0xffffff, true)(v); spots(() => true, 0.03, 0xff9ff3, true)(v); } }),
+);
+FISH.sort((a, b) => a.rarity - b.rarity);
+
 export const FISH_BY_ID = Object.fromEntries(FISH.map((f, i) => [f.id, { ...f, index: i }]));
 
 // ---------- voxel generation ----------
@@ -698,6 +911,16 @@ const TITLES = [
   ['the Destroyer', 'King of Tides', 'Overlord', 'the Unstoppable', 'Lord of the Abyss', 'Omega', 'the Titan'],
 ];
 
+NAMES.starfish = [['Star', 'Twinkle'], ['star', 'twinkle'], 'Starry'];
+NAMES.octopus = [['Octo', 'Inky'], ['pus', 'ink'], 'Eight-Armed'];
+NAMES.turtle = [['Turtle', 'Shell'], ['tle', 'shell'], 'Shelled'];
+// varieties reuse their base fish's endings with their own special word
+function namesFor(f) {
+  if (NAMES[f.id]) return NAMES[f.id];
+  const b = NAMES[f.base];
+  return [[f.word, b[0][0]], b[1], f.adj];
+}
+
 function blend(head, tail) {
   if (head.slice(-1).toLowerCase() === tail[0].toLowerCase()) tail = tail.slice(1);
   return head + tail.toLowerCase();
@@ -705,7 +928,7 @@ function blend(head, tail) {
 
 export function mergeName(a, b) {
   const h = Math.floor(hash3(FISH.findIndex((f) => f.id === a.id) * 31 + 7, FISH.findIndex((f) => f.id === b.id) * 17 + 3, 11) * 1000);
-  const na = NAMES[a.id], nb = NAMES[b.id];
+  const na = namesFor(a), nb = namesFor(b);
   const rarity = Math.max(a.rarity, b.rarity);
   if (a.id === b.id) {
     if (a.id === 'megalodon') return 'Ultra Megalodon';

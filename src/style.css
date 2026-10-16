@@ -215,3 +215,7 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
   .bbtns .mc-btn { flex: 1; }
   #toast { white-space: normal; width: 90%; text-align: center; }
 }
+
+.tank { display: flex; flex-direction: column; gap: 6px; max-height: 55vh; overflow: auto; }
+.hint.dark { color: #333; text-shadow: none; margin-bottom: 8px; }
+.empty-tank { padding: 20px; text-align: center; color: #555; }
