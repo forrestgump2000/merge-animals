@@ -169,7 +169,8 @@ export function createWorld(renderer) {
   scene.background = water;
   scene.fog = new THREE.Fog(0x1f6fa8, 9, 26);
 
-  scene.add(new THREE.HemisphereLight(0xcfeaff, 0x806a40, 2.1));
+  const hemi = new THREE.HemisphereLight(0xcfeaff, 0x806a40, 2.1);
+  scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xffffff, 2.2);
   sun.position.set(3, 8, 6);
   scene.add(sun);
@@ -227,7 +228,7 @@ export function createWorld(renderer) {
       kelpMesh.setColorAt(ki++, _c);
     }
   scene.add(kelpMesh);
-  const coralColors = [0xff6f91, 0xff9f43, 0xb46cff, 0xffd166, 0x4ecdc4];
+  const coralColors = [0, 1, 2, 3, 4];
   for (let i = 0; i < 18; i++) {
     const x = (rng() - 0.5) * 20, z = -1.5 - rng() * 6;
     const c = coralColors[Math.floor(rng() * coralColors.length)];
@@ -310,7 +311,7 @@ export function createWorld(renderer) {
       bubbles.setMatrixAt(j, m4);
     });
     bubbles.instanceMatrix.needsUpdate = true;
-    rays.forEach((r, j) => (r.material.opacity = 0.05 + Math.sin(t * 0.5 + j) * 0.025));
+    rays.forEach((r, j) => (r.material.opacity = (0.05 + Math.sin(t * 0.5 + j) * 0.025) * rayAmt));
     for (let j = parts.length - 1; j >= 0; j--) {
       const p = parts[j];
       p.age += dt;
@@ -332,5 +333,41 @@ export function createWorld(renderer) {
     if (partMesh.instanceColor) partMesh.instanceColor.needsUpdate = true;
   }
 
-  return { scene, update, burst };
+  // ---------- backgrounds ----------
+  let rayAmt = 1;
+  function setTheme(th) {
+    scene.background = new THREE.Color(th.water);
+    scene.fog.color.setHex(th.water);
+    scene.fog.near = th.fog[0];
+    scene.fog.far = th.fog[1];
+    hemi.color.setHex(th.hemi[0]);
+    hemi.groundColor.setHex(th.hemi[1]);
+    hemi.intensity = th.hemi[2];
+    sun.intensity = th.sun;
+    for (const [mat, cols, seed] of [[sandMat, th.sand, 3], [stoneMat, th.stone, 4]]) {
+      mat.map?.dispose();
+      mat.map = paletteTexture(8, cols, seed);
+      mat.needsUpdate = true;
+    }
+    stoneMat.emissive.setHex(th.stoneGlow || 0);
+    decoMat.emissive.setHex(th.decoGlow || 0);
+    let i = 0;
+    for (const k of kelps)
+      for (let j = 0; j < k.h; j++) {
+        _c.setHex(th.kelp[j % 3], THREE.SRGBColorSpace);
+        kelpMesh.setColorAt(i++, _c);
+      }
+    kelpMesh.instanceColor.needsUpdate = true;
+    deco.forEach((d, j) => {
+      _c.setHex(th.coral[d[3] % th.coral.length], THREE.SRGBColorSpace);
+      decoMesh.setColorAt(j, _c);
+    });
+    decoMesh.instanceColor.needsUpdate = true;
+    rayMat.color.setHex(th.ray);
+    rayAmt = th.rayAmt ?? 1;
+    bubbleMat.color.setHex(th.bubble);
+    document.body.style.background = '#' + th.water.toString(16).padStart(6, '0');
+  }
+
+  return { scene, update, burst, setTheme };
 }

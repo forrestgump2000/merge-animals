@@ -219,3 +219,12 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 .tank { display: flex; flex-direction: column; gap: 6px; max-height: 55vh; overflow: auto; }
 .hint.dark { color: #333; text-shadow: none; margin-bottom: 8px; }
 .empty-tank { padding: 20px; text-align: center; color: #555; }
+
+.themes { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.theme {
+  font-family: var(--font); font-size: 20px; color: #fff; text-shadow: 2px 2px 0 #333; background: #8b8b8b;
+  border: 2px solid; border-color: #373737 #fff #fff #373737; padding: 6px; cursor: pointer; display: flex; flex-direction: column; gap: 6px;
+}
+.theme.sel { background: #5d7f4a; outline: 2px solid #fff; }
+.swatch { display: block; height: 56px; border: 2px solid #222; image-rendering: pixelated; }
+.musicrow { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 22px; background: #8b8b8b; color: #fff; text-shadow: 2px 2px 0 #333; padding: 6px 10px; border: 2px solid; border-color: #373737 #fff #fff #373737; }

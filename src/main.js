@@ -2,12 +2,13 @@ import * as THREE from 'three';
 import './style.css';
 import { VoxelModel, createWorld } from './render.js';
 import { FISH, RARITIES, BAITS, fishVoxels, makeCreature, rollFish, simulate, winChance } from './fish.js';
-import { sfx, unlock, toggleMute, isMuted } from './audio.js';
+import { sfx, unlock, toggleMute, isMuted, startMusic, setMusicOn, isMusicOn, setMood } from './audio.js';
+import { THEMES } from './themes.js';
 import { pixelIcon } from './icons.js';
 
 // ---------------- save data ----------------
 const SAVE_KEY = 'mergeAnimals.save.v1';
-const save = { coins: 50, bait: {}, using: 'worm', caught: {}, merges: {}, wins: 0, losses: 0, tank: [] };
+const save = { coins: 50, bait: {}, using: 'worm', caught: {}, merges: {}, wins: 0, losses: 0, tank: [], theme: 'ocean' };
 try { Object.assign(save, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}')); } catch {}
 const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch {} };
 
@@ -17,6 +18,13 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
 renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
 const world = createWorld(renderer);
 const scene = world.scene;
+function applyTheme(id) {
+  const th = THEMES.find((t) => t.id === id) || THEMES[0];
+  world.setTheme(th);
+  setMood(th.mood);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#' + th.water.toString(16).padStart(6, '0'));
+}
+applyTheme(save.theme);
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
 const camBase = new THREE.Vector3(0, 0.9, 9.5);
 camera.position.copy(camBase);
@@ -182,6 +190,30 @@ async function sellCurrent() {
   render();
 }
 
+// ---------------- backgrounds & music ----------------
+function openBackgrounds() {
+  const p = $('panel');
+  p.className = 'panel';
+  const hex = (n) => '#' + n.toString(16).padStart(6, '0');
+  p.innerHTML = `<div class="ptitle">Background</div>
+    <div class="themes">${THEMES.map((t) => `<button class="theme ${save.theme === t.id ? 'sel' : ''}" data-theme="${t.id}">
+      <span class="swatch" style="background:linear-gradient(${hex(t.water)} 0 55%, ${hex(t.coral[0])} 55% 62%, ${hex(t.kelp[0])} 62% 70%, ${t.sand[0]} 70%)"></span>
+      <span class="tname">${t.name}${save.theme === t.id ? ' ✓' : ''}</span></button>`).join('')}</div>
+    <div class="musicrow"><span>🎵 Background music</span>
+      <button class="mc-btn small" id="musicBtn">${isMusicOn() ? 'On' : 'Off'}</button></div>
+    <button class="mc-btn close" id="closeModal">Close</button>`;
+  p.querySelectorAll('[data-theme]').forEach((b) => (b.onclick = () => {
+    sfx.click();
+    save.theme = b.dataset.theme;
+    persist();
+    applyTheme(save.theme);
+    openBackgrounds();
+  }));
+  $('musicBtn').onclick = () => { unlock(); setMusicOn(!isMusicOn()); sfx.click(); openBackgrounds(); };
+  $('closeModal').onclick = closeModal;
+  $('modal').hidden = false;
+}
+
 function openTank() {
   const p = $('panel');
   p.className = 'panel';
@@ -217,7 +249,7 @@ function updateHud() {
   $('coins').textContent = save.coins;
   const b = BAITS.find((x) => x.id === save.using) || BAITS[0];
   $('baitIco').src = pixelIcon(b.id);
-  $('baitName').textContent = b.id === 'worm' ? 'Worm ∞' : `${b.name} ×${save.bait[b.id] || 0}`;
+  $('baitName').textContent = 'Shop · ' + (b.id === 'worm' ? 'Worm ∞' : `${b.name} ×${save.bait[b.id] || 0}`);
   $('muteBtn').textContent = isMuted() ? '♪̸' : '♪';
   $('muteBtn').classList.toggle('off', isMuted());
 }
@@ -725,7 +757,7 @@ window.addEventListener('pointermove', (e) => { if (drag && dex) dex.rot = drag.
 window.addEventListener('pointerup', () => (drag = null));
 
 // ---------------- buttons ----------------
-$('shopBtn').onclick = () => { sfx.click(); openShop(); };
+$('bgBtn').onclick = () => { sfx.click(); openBackgrounds(); };
 $('baitBtn').onclick = () => { sfx.click(); openShop(); };
 $('dexBtn').onclick = () => { sfx.click(); openDex(); };
 $('tankBtn').onclick = () => { sfx.click(); openTank(); };
@@ -746,6 +778,7 @@ let demo = null;
 })();
 $('playBtn').onclick = () => {
   unlock();
+  startMusic();
   sfx.click();
   $('title').classList.add('hide');
   removeActor(demo);
